@@ -16,15 +16,13 @@ function handleRequest(req, res) {
   req.on('end', ()=>{
       if(dataFormat === 'application/json'){
         let parsedData = JSON.parse(store);
-        console.log(parsedData)
+        res.end(store);
       }
 
       if(dataFormat === 'application/x-www-form-urlencoded'){
         let formParseData = qs.parse(store);
-        console.log(JSON.stringify(formParseData));
+        res.end(JSON.stringify(formParsedData));
       }
-      
-      res.end(store);
   })
 }
 
