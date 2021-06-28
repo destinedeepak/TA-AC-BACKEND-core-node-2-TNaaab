@@ -11,7 +11,7 @@ console.log(appAbsolutePath);
 
 console.log('./index.html');
 
-let indexAbsolutePath = path.join(__dirname, '/index.html');//
+let indexAbsolutePath = path.join(__dirname, '/index.html');
 console.log(indexAbsolutePath);
 
 //2.
