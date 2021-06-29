@@ -4,10 +4,8 @@ const qs = require('querystring');
 const { parse } = require('path');
 const fs = require('fs');
 const url = require('url');
-const { endianness } = require('os');
-const { log } = require('console');
 
-const userDir = path.join(__dirname, '/users/');
+const userPath = path.join(__dirname, '/users/');
 const server = http.createServer(handleRequest);
 
 function handleRequest(req, res) {
@@ -22,44 +20,48 @@ function handleRequest(req, res) {
       var parsedData = JSON.parse(store);
     //   console.log(parsedURL.query.username);
 
-      fs.open(userDir + parsedData.username + '.json', 'wx', (error, file) => {
-          if(error){
-            //   console.log(error);
-          }
+      fs.open(userPath + parsedData.username + '.json', 'wx', (err, file) => {
+          if(err) return res.end('Users already exists');
         fs.writeFile(file, store, (err) => {
-            // console.log(err);
-            fs.close(file, (err) => {
-                res.end(`${parsedData.username} is created`);
+            if(err) return res.end(err);
+            fs.close(file, () => {
+                return res.end(`${parsedData.username} is created`);
               });
           });
       });
     } 
 
     if (req.method === 'GET' && parsedURL.pathname === '/users'){
-        fs.readFile(userDir + parsedURL.query.username + '.json',(err, user) => {
-            res.end(user)
+        fs.readFile(userPath + parsedURL.query.username + '.json',(err, user) => {
+            if(err) return res.end(err);
+            return res.end(user);
         })
     }
     
     if(req.method === 'DELETE' && parsedURL.pathname === '/users'){
-        fs.unlink(userDir + parsedURL.query.username + '.json', (err) => {
-            if(err){res.end('No such file available to delete')}
-            res.end(`${parsedURL.query.username} is deleted`)
+        fs.unlink(userPath + parsedURL.query.username + '.json', (err) => {
+            if(err) return res.end(err);
+            return res.end(`${parsedURL.query.username} is deleted`)
         })
     }
 
     if(req.method === 'PUT' && parsedURL.pathname === '/users'){
-        fs.open(userDir + parsedURL.query.username + '.json', 'r+',(err, file) =>{
+        fs.open(userPath + parsedURL.query.username + '.json', 'r+',(err, file) =>{
+            if(err) return res.end(err);
             fs.ftruncate(file, (err)=> {
+                if(err) return res.end(err);
                 fs.writeFile(file, store, (err) => {
-                    // console.log(err);
+                    if(err) return res.end(err);
                     fs.close(file, (err) => {
-                        res.end(`${parsedURL.query.username} is updated`);
+                        if(err) return res.end(err);
+                        return res.end(`${parsedURL.query.username} is updated`);
                       });
                   });
             })
         })
     }
+    // res.statusCode = 404;
+    // res.end("page not found");
   });
 }
 
